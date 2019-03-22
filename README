@@ -1,0 +1,21 @@
+      _________              _________
+     /   _____/__.__. ____  /   _____/ ____ _____    ____
+     \_____  <   |  |/    \ \_____  \_/ ___\\__  \  /    \
+     /        \___  |   |  \/        \  \___ / __ \|   |  \
+    /_______  / ____|___|  /_______  /\___  >____  /___|  /
+            \/\/         \/        \/     \/     \/     \/
+
+Synscan 5.02 (C) 2007-2011 John Anderson (john@ev6.net)
+                           Neil Kettle (mu-b@digit-labs.org)
+Comments, queries, flames, bugreports etc -> email
+
+** NOTE **
+This is the first official Synscan5 release!, and may not function correctly.
+
+Licensed under the GPL version 2. If you modify this app for your own
+needs, we would appreciate a copy of the changes being emailed to us!
+
+Synscan works using 2 programs..
+The "synscan" tool will send SYN packets.
+And a second program, sslog will listen for the resulting SYN/ACK
+packets to determine if ports are open.

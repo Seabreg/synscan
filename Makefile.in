@@ -1,0 +1,77 @@
+#
+# This file is part of Synscan,
+# Copyright (C) 2007-2011 - John Anderson, Neil Kettle
+#
+
+CC = @CC@
+CFLAGS=@CFLAGS@ @DEFS@ -Wall
+LIBS = @LIBS@
+
+OBJS_MINIMAL = \
+	common.o net.o obuf.o
+
+OBJS = $(OBJS_MINIMAL)
+PROJ = synscan sslog
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+mandir = @mandir@
+datadir	= @datadir@
+datarootdir = @datarootdir@
+
+INSTALL = @INSTALL@
+
+default:
+	@echo "To build SynScan, type:"
+	@echo " make SYSTEM"
+	@echo "where SYSTEM can be one of the following:"
+	@echo "freebsd                  FreeBSD (x86-64)"
+	@echo "linux                    Linux (x86, x86-64)"
+	@echo "macos                    Mac OS X (PPC, x86-64)"
+	@echo "netbsd                   NetBSD (x86-64)"
+	@echo "openbsd                  OpenBSD (x86-64)"
+	@echo "solaris-sparc-gcc        Solaris (SPARC)"
+
+freebsd:
+	$(MAKE) $(PROJ) \
+		CFLAGS="$(CFLAGS) -DBSD -DHAVE_CRUFTY_IPLENOFF"
+
+linux:
+	$(MAKE) $(PROJ) \
+		CFLAGS="$(CFLAGS) -DLINUX"
+
+macos:
+	$(MAKE) $(PROJ) \
+		CFLAGS="$(CFLAGS) -DMACOS -DHAVE_CRUFTY_IPLENOFF -DHOST_DEFIFC=\\\"en0\\\""
+
+netbsd:
+	$(MAKE) $(PROJ) \
+		CFLAGS="$(CFLAGS) -DBSD -DHAVE_CRUFTY_IPLENOFF"
+
+openbsd:
+	$(MAKE) $(PROJ) \
+		CFLAGS="$(CFLAGS) -DBSD"
+
+solaris-sparc-gcc:
+	$(MAKE) $(PROJ) \
+		CFLAGS="$(CFLAGS) -DBSD_COMP -DSOLARIS" \
+		LIBS="$(LIBS) -lsocket -lresolv -lnsl"
+
+synscan: synscan.c synscan.h ${OBJS}
+	${CC} ${LDFLAGS} ${CFLAGS} $< ${OBJS} ${LIBS} -o synscan
+
+sslog: sslog.c ${OBJS}
+	${CC} ${LDFLAGS} ${CFLAGS} $< ${OBJS} ${LIBS} -o sslog
+
+install:
+	mkdir -p -m 755 ${bindir}
+	strip synscan
+	strip sslog
+	@INSTALL_PROGRAM@ synscan sslog ${bindir}
+
+clean:
+	rm -f ${PROJ} ${OBJS} core *.core
+
+distclean: clean
+	rm -f Makefile config.h config.status config.cache config.log configure.lineno

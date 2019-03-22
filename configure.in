@@ -1,0 +1,98 @@
+#
+# This file is part of Synscan5,
+# Copyright (C) 2007-2011 - John Anderson, Neil Kettle
+#
+
+AC_INIT(Synscan, 5.02, mu-b@digit-labs.org)
+AC_CONFIG_SRCDIR([synscan.c])
+AC_CONFIG_HEADER([config.h])
+
+##
+##
+##
+AC_DEFUN([AC_DEFINE_DIR], [
+  test "x$prefix" = xNONE && prefix="$ac_default_prefix"
+  test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
+  ac_define_dir=`eval echo [$]$2`
+  ac_define_dir=`eval echo [$]ac_define_dir`
+  ifelse($3, ,
+    AC_DEFINE_UNQUOTED($1, "$ac_define_dir"),
+    AC_DEFINE_UNQUOTED($1, "$ac_define_dir", $3))
+])
+
+AC_DEFINE_DIR(DATADIR, datadir, [Define to the directory for installing read-only architecture-independent data.])
+AC_PREFIX_DEFAULT(/usr/local)
+
+##
+## Checks for programs.
+##
+AC_PROG_CC
+AC_PROG_INSTALL
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS([getopt.h ifaddrs.h sys/ioctl.h])
+
+##
+## Locate libpcap
+##
+AC_MSG_CHECKING(for libpcap)
+AC_ARG_WITH(libpcap,
+  [AS_HELP_STRING([--with-libpcap=DIR],
+                 [use libpcap build directory])],
+[ case "$withval" in
+  yes|no)
+     AC_MSG_RESULT(no)
+     ;;
+  *)
+     AC_MSG_RESULT($withval)
+     if test -f $withval/pcap.h -a -f $withval/libpcap.a; then
+        owd=`pwd`
+	if cd $withval; then withval=`pwd`; cd $owd; fi
+        CFLAGS="$CFLAGS -I$withval -I$withval/bpf"
+        LIBS="$LIBS -L$withval -lpcap"
+     else
+        AC_ERROR(pcap.h or libpcap.a not found in $withval)
+     fi
+     ;;
+  esac ],
+[ if test -f ${prefix}/include/pcap.h; then
+     CFLAGS="$CFLAGS -I${prefix}/include"
+     LIBS="$LIBS -L${prefix}/lib -lpcap"
+  elif test -f /usr/include/pcap/pcap.h; then
+     CFLAGS="$CFLAGS -I/usr/include/pcap"
+     LIBS="$LIBS -lpcap"
+  elif test -f /usr/include/pcap.h; then
+     LIBS="$LIBS -lpcap"
+  else
+     AC_MSG_RESULT(no)
+     AC_ERROR(libpcap not found)
+  fi
+  AC_MSG_RESULT(yes) ]
+)
+
+##
+## Check of getoptlong
+##
+ac_cv_have_getopt_long="no"
+AC_CHECK_FUNCS([getopt_long],
+  [ac_cv_have_getopt_long="yes"],
+  [AC_CHECK_LIB([gnugetopt], [getopt_long],
+    [ac_cv_have_getopt_long="yes"
+      LIBS="${LIBS} -lgnugetopt"])])
+if test "$ac_cv_have_getopt_long" != "no"; then
+  AC_DEFINE([HAVE_GETOPT_LONG])
+fi
+
+AC_ARG_ENABLE([pcap-filter],
+  [AS_HELP_STRING([--enable-pcap-filter],
+    [enable pcap filter in sslog])],
+  [AC_DEFINE([USE_PCAP_FILTER])],
+  []
+)
+
+##
+## Output files
+##
+AC_CONFIG_FILES([Makefile])
+AC_OUTPUT
